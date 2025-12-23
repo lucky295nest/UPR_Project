@@ -36,17 +36,40 @@ int main(int argc, char *argv[]) {
 	snprintf(player_img_path, sizeof(player_img_path), "%splayer.png", global_assets_path);
 	Player_Init(&player, renderer, 6, 6, 0.45f, 0.1f, player_pos, player_size, player_img_path);
 
+	// Map stuff
 	Map map;
 
-	char map_img_path_1[512];
-	snprintf(map_img_path_1, sizeof(map_img_path_1), "%swinter-outside.png", global_assets_path);
-	char map_img_path_2[512];
-	snprintf(map_img_path_2, sizeof(map_img_path_2), "%swinter-items.png", global_assets_path);
-	char map_csv_path_1[512];
-	snprintf(map_csv_path_1, sizeof(map_csv_path_1), "%slevel-1_ground.csv", global_assets_path);
-	char map_csv_path_2[512];
-	snprintf(map_csv_path_2, sizeof(map_csv_path_2), "%slevel-1_tiles.csv", global_assets_path);
-	Map_Init(&map, renderer, map_csv_path_1, map_csv_path_2, map_img_path_1, map_img_path_2, 7, 9);
+	// Map tilesets
+	char tilesets_buf[2][FILE_PATH_SIZE];
+	snprintf(tilesets_buf[0], sizeof(tilesets_buf[0]), "%s%s", global_assets_path, "items.png");
+	snprintf(tilesets_buf[1], sizeof(tilesets_buf[1]), "%s%s", global_assets_path, "tilemap.png");
+
+	// Map layouts
+	char layouts_buf[5][FILE_PATH_SIZE];
+	snprintf(layouts_buf[0], sizeof(layouts_buf[0]), "%s%s", global_assets_path, "level1/level-1_collisions.csv");
+	snprintf(layouts_buf[1], sizeof(layouts_buf[1]), "%s%s", global_assets_path, "level1/level-1_ground_bottom.csv");
+	snprintf(layouts_buf[2], sizeof(layouts_buf[2]), "%s%s", global_assets_path, "level1/level-1_ground_top.csv");
+	snprintf(layouts_buf[3], sizeof(layouts_buf[3]), "%s%s", global_assets_path, "level1/level-1_items_bottom.csv");
+	snprintf(layouts_buf[4], sizeof(layouts_buf[4]), "%s%s", global_assets_path, "level1/level-1_items_top.csv");
+
+	int cols[5] = {
+		1,	// Collisions
+		10, // Ground bottom
+		10, // Ground top
+		12, // Items bottom
+		12}; // Items top
+
+	char *layouts[5];
+	for (int i = 0; i < 5; i++) {
+		layouts[i] = layouts_buf[i];
+	}
+
+	char *tilesets[2];
+	for (int i = 0; i < 2; i++) {
+		tilesets[i] = tilesets_buf[i];
+	}
+
+	Map_Init(&map, renderer, 5, 2, layouts, tilesets, cols);
 
 	// Setup timing variables
 	uint64_t last_time = SDL_GetTicksNS();
@@ -76,9 +99,11 @@ int main(int argc, char *argv[]) {
 		// Game logic
 		Player_Update(&player, event, delta_time);
 
-		Map_Draw(map.textures[0], renderer, &map.layers[0], 16);
+		Map_Draw(map.textures[1], renderer, &map.layers[1], 16); // Ground bottom
+		Map_Draw(map.textures[1], renderer, &map.layers[2], 16); // Ground top
+		Map_Draw(map.textures[0], renderer, &map.layers[3], 16); // Items bottom
 		Player_Draw(&player, renderer, delta_time);
-		Map_Draw(map.textures[1], renderer, &map.layers[1], 16);
+		Map_Draw(map.textures[0], renderer, &map.layers[4], 16); // Items top
 
 		SDL_RenderPresent(renderer);
 

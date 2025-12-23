@@ -7,12 +7,13 @@
 #include "global.h"
 #include "map.h"
 
+// Private
 TileLayer ParseCSV(const char *path_to_csv) {
 	TileLayer layer = {0};
 
 	FILE *file = fopen(path_to_csv, "r");
 	if (!file) {
-		printf("Failed to open CSV %s", path_to_csv);
+		printf("Failed to open CSV %s\n", path_to_csv);
 		return layer;
 	}
 
@@ -60,24 +61,23 @@ TileLayer ParseCSV(const char *path_to_csv) {
 	return layer;
 }
 
-void LoadTextures(Map *map, SDL_Renderer *renderer, char *path_img_1, char *path_img_2) {
-	SDL_Surface *sur1 = IMG_Load(path_img_1);
-	map->textures[0] = SDL_CreateTextureFromSurface(renderer, sur1);
-	SDL_SetTextureScaleMode(map->textures[0], SDL_SCALEMODE_NEAREST);
-	SDL_DestroySurface(sur1);
-
-	SDL_Surface *sur2 = IMG_Load(path_img_2);
-	map->textures[1] = SDL_CreateTextureFromSurface(renderer, sur2);
-	SDL_SetTextureScaleMode(map->textures[1], SDL_SCALEMODE_NEAREST);
-	SDL_DestroySurface(sur2);
+void LoadTextures(SDL_Texture **texture, SDL_Renderer *renderer, char *path) {
+	SDL_Surface *sur = IMG_Load(path);
+	*texture = SDL_CreateTextureFromSurface(renderer, sur);
+	SDL_SetTextureScaleMode(*texture, SDL_SCALEMODE_NEAREST);
+	SDL_DestroySurface(sur);
 }
 
-void Map_Init(Map *map, SDL_Renderer *renderer, char *path_csv1, char *path_csv2, char *path_tiles1, char *path_tiles2, int t1_cols, int t2_cols) {
-	map->layers[0] = ParseCSV(path_csv1);
-	map->layers[1] = ParseCSV(path_csv2);
-	map->layers[0].tileset_cols = t1_cols;
-	map->layers[1].tileset_cols = t2_cols;
-	LoadTextures(map, renderer, path_tiles1, path_tiles2);
+// Public
+void Map_Init(Map *map, SDL_Renderer *renderer, int layouts_num, int tilesets_num, char *layouts[], char *tilesets[], int cols[]) {
+	for (int i = 0; i < layouts_num; i++) {
+		map->layers[i] = ParseCSV(layouts[i]);
+		map->layers[i].tileset_cols = cols[i];
+	}
+
+	for (int i = 0; i < tilesets_num; i++) {
+		LoadTextures(&map->textures[i], renderer, tilesets[i]);
+	}
 }
 
 void Map_Draw(SDL_Texture *texture, SDL_Renderer *renderer, TileLayer *layer, int tile_size) {

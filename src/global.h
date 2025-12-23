@@ -1,6 +1,8 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
+#define FILE_PATH_SIZE 512
+
 typedef struct
 {
 	float x;
@@ -13,7 +15,7 @@ typedef struct
 	int y;
 } Vector2_int;
 
-extern char global_assets_path[512];
+extern char global_assets_path[FILE_PATH_SIZE];
 
 void InitGlobalPath();
 
