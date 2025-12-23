@@ -5,6 +5,9 @@
 
 #include "global.h"
 
+#define LAYERS_NUM 10
+#define TEXTURES_NUM 10
+
 typedef struct
 {
 	Vector2_int size;
@@ -14,10 +17,8 @@ typedef struct
 
 typedef struct
 {
-	SDL_Texture *texture_1;
-	SDL_Texture *texture_2;
-	TileLayer Layer_1;
-	TileLayer Layer_2;
+	SDL_Texture *textures[TEXTURES_NUM];
+	TileLayer layers[LAYERS_NUM];
 } Map;
 
 void Map_Init(Map *map, SDL_Renderer *renderer, char *path_csv1, char *path_csv2, char *path_tiles1, char *path_tiles2, int t1_cols, int t2_cols);

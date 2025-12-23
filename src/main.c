@@ -76,9 +76,9 @@ int main(int argc, char *argv[]) {
 		// Game logic
 		Player_Update(&player, event, delta_time);
 
-		Map_Draw(map.texture_1, renderer, &map.Layer_1, 16);
+		Map_Draw(map.textures[0], renderer, &map.layers[0], 16);
 		Player_Draw(&player, renderer, delta_time);
-		Map_Draw(map.texture_2, renderer, &map.Layer_2, 16);
+		Map_Draw(map.textures[1], renderer, &map.layers[1], 16);
 
 		SDL_RenderPresent(renderer);
 

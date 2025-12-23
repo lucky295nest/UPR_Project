@@ -62,21 +62,21 @@ TileLayer ParseCSV(const char *path_to_csv) {
 
 void LoadTextures(Map *map, SDL_Renderer *renderer, char *path_img_1, char *path_img_2) {
 	SDL_Surface *sur1 = IMG_Load(path_img_1);
-	map->texture_1 = SDL_CreateTextureFromSurface(renderer, sur1);
-	SDL_SetTextureScaleMode(map->texture_1, SDL_SCALEMODE_NEAREST);
+	map->textures[0] = SDL_CreateTextureFromSurface(renderer, sur1);
+	SDL_SetTextureScaleMode(map->textures[0], SDL_SCALEMODE_NEAREST);
 	SDL_DestroySurface(sur1);
 
 	SDL_Surface *sur2 = IMG_Load(path_img_2);
-	map->texture_2 = SDL_CreateTextureFromSurface(renderer, sur2);
-	SDL_SetTextureScaleMode(map->texture_2, SDL_SCALEMODE_NEAREST);
+	map->textures[1] = SDL_CreateTextureFromSurface(renderer, sur2);
+	SDL_SetTextureScaleMode(map->textures[1], SDL_SCALEMODE_NEAREST);
 	SDL_DestroySurface(sur2);
 }
 
 void Map_Init(Map *map, SDL_Renderer *renderer, char *path_csv1, char *path_csv2, char *path_tiles1, char *path_tiles2, int t1_cols, int t2_cols) {
-	map->Layer_1 = ParseCSV(path_csv1);
-	map->Layer_2 = ParseCSV(path_csv2);
-	map->Layer_1.tileset_cols = t1_cols;
-	map->Layer_2.tileset_cols = t2_cols;
+	map->layers[0] = ParseCSV(path_csv1);
+	map->layers[1] = ParseCSV(path_csv2);
+	map->layers[0].tileset_cols = t1_cols;
+	map->layers[1].tileset_cols = t2_cols;
 	LoadTextures(map, renderer, path_tiles1, path_tiles2);
 }
 
@@ -104,23 +104,17 @@ void Map_Draw(SDL_Texture *texture, SDL_Renderer *renderer, TileLayer *layer, in
 }
 
 void Map_Destroy(Map *map) {
-	if (map->Layer_1.tiles != NULL) {
-		free(map->Layer_1.tiles);
-		map->Layer_1.tiles = NULL;
+	for (int i = 0; i < LAYERS_NUM; i++) {
+		if (map->layers[i].tiles != NULL) {
+			free(map->layers[i].tiles);
+			map->layers[i].tiles = NULL;
+		}
 	}
 
-	if (map->Layer_2.tiles != NULL) {
-		free(map->Layer_2.tiles);
-		map->Layer_2.tiles = NULL;
-	}
-
-	if (map->texture_1 != NULL) {
-		SDL_DestroyTexture(map->texture_1);
-		map->texture_1 = NULL;
-	}
-
-	if (map->texture_2 != NULL) {
-		SDL_DestroyTexture(map->texture_2);
-		map->texture_2 = NULL;
+	for (int i = 0; i < TEXTURES_NUM; i++) {
+		if (map->textures[i] != NULL) {
+			SDL_DestroyTexture(map->textures[i]);
+			map->textures[i] = NULL;
+		}
 	}
 }
