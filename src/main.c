@@ -1,6 +1,7 @@
 #include <SDL3/SDL.h>
 #include <stdio.h>
 
+#include "global.h"
 #include "player.h"
 
 #define FPS 60
@@ -25,11 +26,17 @@ int main(int argc, char *argv[])
 
   SDL_SetRenderLogicalPresentation(renderer, 24 * 16, 24 * 16, SDL_LOGICAL_PRESENTATION_LETTERBOX);
 
+  // Global path init
+  InitGlobalPath();
+
   // Game init
   Player player;
   Vector2 player_pos = {50, 50};
   Vector2 player_size = {24, 24};
-  Player_Init(&player, renderer, 6, 6, 0.45f, 0.1f, player_pos, player_size, "../assets/player.png");
+
+  char player_img_path[512];
+  snprintf(player_img_path, sizeof(player_img_path), "%splayer.png", global_assets_path);
+  Player_Init(&player, renderer, 6, 6, 0.45f, 0.1f, player_pos, player_size, player_img_path);
 
   // Setup timing variables
   uint64_t last_time = SDL_GetTicksNS();

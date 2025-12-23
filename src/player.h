@@ -1,3 +1,6 @@
+#ifndef PLAYER_H
+#define PLAYER_H
+
 #include <stdlib.h>
 
 #include "SDL3/SDL.h"
@@ -40,3 +43,5 @@ void Player_Init(Player *player, SDL_Renderer *renderer, int lives, float speed,
 void Player_Draw(Player *player, SDL_Renderer *renderer, float delta_time);
 void Player_Update(Player *player, SDL_Event event, float delta_time);
 void Player_Delete(Player *player);
+
+#endif

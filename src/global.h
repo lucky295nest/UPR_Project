@@ -1,5 +1,5 @@
-#include <stdio.h>
-#include <SDL3_image/SDL_image.h>
+#ifndef GLOBAL_H
+#define GLOBAL_H
 
 typedef struct
 {
@@ -13,6 +13,8 @@ typedef struct
     int y;
 } Vector2_int;
 
+extern char global_assets_path[512];
 
+void InitGlobalPath();
 
-void InitGlobalAssetsPath(void);
+#endif
