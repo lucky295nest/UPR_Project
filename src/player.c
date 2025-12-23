@@ -2,6 +2,7 @@
 #include <SDL3_image/SDL_image.h>
 #include <stdio.h>
 
+#include "map.h"
 #include "player.h"
 
 // Private
@@ -56,16 +57,69 @@ Vector2_int ChooseSprite(Player *player) {
 	return result;
 }
 
+int IsCollider(Map *map, int x, int y) {
+	TileLayer *layer = &map->layers[0]; // Collision layer
+
+	int tx = x / map->tile_size;
+	int ty = y / map->tile_size;
+
+	return (layer->tiles[ty * layer->size.x + tx]);
+}
+
+int CanMove(Player *player, Map *map) {
+	SDL_Rect hitbox = {
+		player->hitbox_pos.x,
+		player->hitbox_pos.y,
+		player->hitbox_size.x,
+		player->hitbox_size.y};
+
+	int x = 0;
+	int y = 0;
+
+	switch (player->move_dir) {
+	case LEFT:
+		x = hitbox.x - 1;
+		if (IsCollider(map, x, hitbox.y) && IsCollider(map, x, hitbox.y + hitbox.h)) {
+			return 1;
+		}
+		break;
+	case RIGHT:
+		x = hitbox.x + hitbox.w + 1;
+		if (IsCollider(map, x, hitbox.y) && IsCollider(map, x, hitbox.y + hitbox.h)) {
+			return 1;
+		}
+		break;
+	case UP:
+		y = hitbox.y - 1;
+		if (IsCollider(map, hitbox.x, y) && IsCollider(map, hitbox.x + hitbox.w, y)) {
+			return 1;
+		}
+		break;
+	case DOWN:
+		y = hitbox.y + hitbox.h + 1;
+		if (IsCollider(map, hitbox.x, y) && IsCollider(map, hitbox.x + hitbox.w, y)) {
+			return 1;
+		}
+		break;
+	}
+	return 0;
+}
+
 // Public
-void Player_Init(Player *player, SDL_Renderer *renderer, int lives, float speed, float idle_speed, float walking_speed, Vector2 pos, Vector2 size, char *img_path) {
+void Player_Init(Player *player, SDL_Renderer *renderer, int lives, float speed, float idle_speed, float walking_speed, Vector2 pos, Vector2 size, char *img_path, Vector2 hitbox_offset, Vector2 hitbox_size) {
 	player->lives = lives;
 	player->speed = speed * 10;
 	player->size = size;
 	player->pos = pos;
 	player->score = 0;
+	player->move_dir = NONE;
 
 	player->dir = RIGHT;
 	player->state = IDLE_R;
+
+	player->hitbox_offset = hitbox_offset;
+	player->hitbox_size = hitbox_size;
+	player->hitbox_pos = player->pos;
 
 	player->anim_timer = 0;
 	player->total_frames = 8;
@@ -88,7 +142,7 @@ void Player_Draw(Player *player, SDL_Renderer *renderer, float delta_time) {
 	SDL_RenderTexture(renderer, player->texture, &srcrect, &dstrect);
 }
 
-void Player_Update(Player *player, SDL_Event event, float delta_time) {
+void Player_Update(Player *player, Map *map, SDL_Event event, float delta_time) {
 	// Animation timing
 	player->anim_timer += delta_time;
 
@@ -101,29 +155,53 @@ void Player_Update(Player *player, SDL_Event event, float delta_time) {
 	// Movement
 	const bool *state = SDL_GetKeyboardState(NULL);
 
+	player->hitbox_pos.x = player->pos.x + player->hitbox_offset.x;
+	player->hitbox_pos.y = player->pos.y + player->hitbox_offset.y;
+
 	if (state[SDL_SCANCODE_W] || state[SDL_SCANCODE_UP]) {
-		player->pos.y -= player->speed * delta_time;
+		player->move_dir = UP;
+
+		if (CanMove(player, map)) {
+			player->pos.y -= player->speed * delta_time;
+		}
+
 		if (player->dir == LEFT) {
 			player->state = WALKING_L;
 		} else {
 			player->state = WALKING_R;
 		}
 	} else if (state[SDL_SCANCODE_S] || state[SDL_SCANCODE_DOWN]) {
-		player->pos.y += player->speed * delta_time;
+		player->move_dir = DOWN;
+
+		if (CanMove(player, map)) {
+			player->pos.y += player->speed * delta_time;
+		}
+
 		if (player->dir == LEFT) {
 			player->state = WALKING_L;
 		} else {
 			player->state = WALKING_R;
 		}
 	} else if (state[SDL_SCANCODE_D] || state[SDL_SCANCODE_RIGHT]) {
+		player->move_dir = RIGHT;
 		player->dir = RIGHT;
-		player->pos.x += player->speed * delta_time;
+
+		if (CanMove(player, map)) {
+			player->pos.x += player->speed * delta_time;
+		}
+
 		player->state = WALKING_R;
 	} else if (state[SDL_SCANCODE_A] || state[SDL_SCANCODE_LEFT]) {
+		player->move_dir = LEFT;
 		player->dir = LEFT;
-		player->pos.x -= player->speed * delta_time;
+
+		if (CanMove(player, map)) {
+			player->pos.x -= player->speed * delta_time;
+		}
+
 		player->state = WALKING_L;
 	} else {
+		player->move_dir = NONE;
 		if (player->dir == LEFT) {
 			player->state = IDLE_L;
 		} else {

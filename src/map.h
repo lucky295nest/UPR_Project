@@ -17,11 +17,12 @@ typedef struct
 
 typedef struct
 {
+	int tile_size;
 	SDL_Texture *textures[TEXTURES_NUM];
 	TileLayer layers[LAYERS_NUM];
 } Map;
 
-void Map_Init(Map *map, SDL_Renderer *renderer, int layouts_num, int tilesets_num, char *layouts[], char *tilesets[], int cols[]);
+void Map_Init(Map *map, SDL_Renderer *renderer, int tile_size, int layouts_num, int tilesets_num, char *layouts[], char *tilesets[], int cols[]);
 void Map_Draw(SDL_Texture *texture, SDL_Renderer *renderer, TileLayer *layer, int tile_size);
 void Map_Destroy(Map *map);
 

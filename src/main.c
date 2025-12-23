@@ -27,14 +27,17 @@ int main(int argc, char *argv[]) {
 	// Global path init
 	InitGlobalPath();
 
-	// Game init
+	// Player init
 	Player player;
-	Vector2 player_pos = {50, 50};
+	Vector2 player_pos = {2.5f * 16, 2.5f * 16};
 	Vector2 player_size = {24, 24};
+
+	Vector2 player_hitbox_offset = {8, 15};
+	Vector2 player_hitbox_size = {10, 8};
 
 	char player_img_path[512];
 	snprintf(player_img_path, sizeof(player_img_path), "%splayer.png", global_assets_path);
-	Player_Init(&player, renderer, 6, 6, 0.45f, 0.1f, player_pos, player_size, player_img_path);
+	Player_Init(&player, renderer, 6, 6, 0.45f, 0.075f, player_pos, player_size, player_img_path, player_hitbox_offset, player_hitbox_size);
 
 	// Map stuff
 	Map map;
@@ -69,7 +72,7 @@ int main(int argc, char *argv[]) {
 		tilesets[i] = tilesets_buf[i];
 	}
 
-	Map_Init(&map, renderer, 5, 2, layouts, tilesets, cols);
+	Map_Init(&map, renderer, 16, 5, 2, layouts, tilesets, cols);
 
 	// Setup timing variables
 	uint64_t last_time = SDL_GetTicksNS();
@@ -97,13 +100,14 @@ int main(int argc, char *argv[]) {
 		SDL_RenderClear(renderer);
 
 		// Game logic
-		Player_Update(&player, event, delta_time);
+		Player_Update(&player, &map, event, delta_time);
 
-		Map_Draw(map.textures[1], renderer, &map.layers[1], 16); // Ground bottom
-		Map_Draw(map.textures[1], renderer, &map.layers[2], 16); // Ground top
-		Map_Draw(map.textures[0], renderer, &map.layers[3], 16); // Items bottom
+		Map_Draw(map.textures[1], renderer, &map.layers[1], map.tile_size); // Ground bottom
+		Map_Draw(map.textures[1], renderer, &map.layers[2], map.tile_size); // Ground top
+		Map_Draw(map.textures[0], renderer, &map.layers[3], map.tile_size); // Items bottom
 		Player_Draw(&player, renderer, delta_time);
-		Map_Draw(map.textures[0], renderer, &map.layers[4], 16); // Items top
+
+		Map_Draw(map.textures[0], renderer, &map.layers[4], map.tile_size); // Items top
 
 		SDL_RenderPresent(renderer);
 

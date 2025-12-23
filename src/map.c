@@ -69,7 +69,9 @@ void LoadTextures(SDL_Texture **texture, SDL_Renderer *renderer, char *path) {
 }
 
 // Public
-void Map_Init(Map *map, SDL_Renderer *renderer, int layouts_num, int tilesets_num, char *layouts[], char *tilesets[], int cols[]) {
+void Map_Init(Map *map, SDL_Renderer *renderer, int tile_size, int layouts_num, int tilesets_num, char *layouts[], char *tilesets[], int cols[]) {
+	map->tile_size = tile_size;
+
 	for (int i = 0; i < layouts_num; i++) {
 		map->layers[i] = ParseCSV(layouts[i]);
 		map->layers[i].tileset_cols = cols[i];
