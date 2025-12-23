@@ -29,5 +29,6 @@
    cd build
    cmake .. -DCMAKE_BUILD_TYPE=Release # or other modes
    cmake --build .
+   export ASAN_OPTIONS=detect_leaks=1 # checking for memory leaks
    ./PacmanClone
    ```

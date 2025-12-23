@@ -170,7 +170,7 @@ void Player_Delete(Player *player)
 {
     if (!player->texture)
     {
-        free(player->texture);
+        SDL_DestroyTexture(player->texture);
         player->texture = NULL;
     }
 }
