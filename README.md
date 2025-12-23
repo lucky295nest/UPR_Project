@@ -27,7 +27,7 @@
    ```bash
    mkdir build
    cd build
-   cmake ..
+   cmake .. -DCMAKE_BUILD_TYPE=Release # or other modes
    cmake --build .
    ./PacmanClone
    ```
