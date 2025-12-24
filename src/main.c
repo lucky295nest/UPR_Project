@@ -10,29 +10,7 @@
 #define FPS 60
 #define FRAME_TARGET_MS (1000.0f / FPS)
 
-int main(int argc, char *argv[]) {
-	SDL_Window *window = NULL;
-	SDL_Renderer *renderer = NULL;
-
-	if (!SDL_Init(SDL_INIT_VIDEO)) {
-		fprintf(stderr, "SDL_Init Error: %s\n", SDL_GetError());
-		return 1;
-	}
-
-	if (!SDL_CreateWindowAndRenderer("PacMan", 800, 800, SDL_WINDOW_RESIZABLE, &window, &renderer)) {
-		fprintf(stderr, "Create Window Error: %s\n", SDL_GetError());
-		return 1;
-	}
-
-	SDL_SetRenderLogicalPresentation(renderer, 30 * 16, 20 * 16, SDL_LOGICAL_PRESENTATION_LETTERBOX);
-
-	Game game;
-	Player player;
-	Scene scene_1;
-
-	// Map stuff
-	Map map;
-
+void Map1_Init(Map *map, SDL_Renderer *renderer) {
 	InitGlobalPath();
 
 	// Map tilesets
@@ -65,10 +43,39 @@ int main(int argc, char *argv[]) {
 		tilesets[i] = tilesets_buf[i];
 	}
 
-	Map_Init(&map, renderer, 16, 5, 2, layouts, tilesets, cols);
-	Scene_Init(&scene_1, &player, &map);
+	Map_Init(map, renderer, 16, 5, 2, layouts, tilesets, cols);
+}
 
+// -------------------------------------------------------- Main --------------------------------------------------------
+int main(int argc, char *argv[]) {
+	SDL_Window *window = NULL;
+	SDL_Renderer *renderer = NULL;
+
+	if (!SDL_Init(SDL_INIT_VIDEO)) {
+		fprintf(stderr, "SDL_Init Error: %s\n", SDL_GetError());
+		return 1;
+	}
+
+	if (!SDL_CreateWindowAndRenderer("PacMan", 800, 800, SDL_WINDOW_RESIZABLE, &window, &renderer)) {
+		fprintf(stderr, "Create Window Error: %s\n", SDL_GetError());
+		return 1;
+	}
+
+	SDL_SetRenderLogicalPresentation(renderer, 30 * 16, 20 * 16, SDL_LOGICAL_PRESENTATION_LETTERBOX);
+
+	Game game;
+	Player player;
+
+	// ------------------------- Scene 1 -------------------------
+	Scene scene_1;
+	Map map_1;
+	Map1_Init(&map_1, renderer);
+	Scene_Init(&scene_1, &player, &map_1);
+
+
+	// ------------------------ Game init ------------------------
 	Scene *scenes[1] = {&scene_1};
+
 	Game_Init(&game, &player, scenes, 1);
 	Game_Init_Scene(&game, 0, renderer);
 
@@ -76,10 +83,10 @@ int main(int argc, char *argv[]) {
 	uint64_t last_time = SDL_GetTicksNS();
 	float delta_time = 0.0f;
 
-	// Game loop
+	// ------------------------ Game loop ------------------------
 	int done = 0;
 	while (!done) {
-		// Calculate delta time
+		// -------------------- Delta time --------------------
 		uint64_t current_time = SDL_GetTicksNS();
 		delta_time = (float)((current_time - last_time) / 1000000000.0f);
 		last_time = current_time;
@@ -97,7 +104,7 @@ int main(int argc, char *argv[]) {
 		// Game loop
 		Game_Update_Scene(&game, 0, renderer, delta_time, event);
 
-		// Framerate stuff
+		// ------------------ Framerate cap ------------------
 		uint64_t end_ticks = SDL_GetTicks();
 		uint64_t elapsed_ticks = end_ticks - start_ticks;
 

@@ -3,15 +3,17 @@
 
 #include "game.h"
 #include "map.h"
-#include "scene.h"
 #include "player.h"
+#include "scene.h"
 
 void Game_Init(Game *game, Player *player, Scene *scenes[], int scenes_num) {
-	for (int i = 0; i < scenes_num; i++)
-	{
+	for (int i = 0; i < scenes_num; i++) {
 		game->scenes[i] = *scenes[i];
 		game->scenes[i].player = player;
 	}
+}
+
+void Game_Update(Game *game, SDL_Renderer *renderer, int scenes_num) {
 }
 
 void Game_Init_Scene(Game *game, int scene, SDL_Renderer *renderer) {
@@ -54,8 +56,7 @@ void Game_Update_Scene(Game *game, int scenes_num, SDL_Renderer *renderer, float
 
 void Game_End(Game *game) {
 
-	for (int i = 0; i < SCENES_NUM; i++)
-	{
+	for (int i = 0; i < SCENES_NUM; i++) {
 		Scene_Destroy(&game->scenes[i]);
 	}
 }

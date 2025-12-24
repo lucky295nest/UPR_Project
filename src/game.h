@@ -14,6 +14,7 @@ typedef struct
 } Game;
 
 void Game_Init(Game *game, Player *player, Scene *scenes[], int scenes_num);
+void Game_Update(Game *game, SDL_Renderer *renderer, int scenes_num);
 void Game_Init_Scene(Game *game, int scene, SDL_Renderer *renderer);
 void Game_Update_Scene(Game *game, int scenes_num, SDL_Renderer *renderer, float delta_time, SDL_Event event);
 void Game_End(Game *game);
