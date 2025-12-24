@@ -1,9 +1,11 @@
 #include <SDL3/SDL.h>
 #include <stdio.h>
 
+#include "game.h"
 #include "global.h"
 #include "map.h"
 #include "player.h"
+#include "scene.h"
 
 #define FPS 60
 #define FRAME_TARGET_MS (1000.0f / FPS)
@@ -24,23 +26,14 @@ int main(int argc, char *argv[]) {
 
 	SDL_SetRenderLogicalPresentation(renderer, 30 * 16, 20 * 16, SDL_LOGICAL_PRESENTATION_LETTERBOX);
 
-	// Global path init
-	InitGlobalPath();
-
-	// Player init
+	Game game;
 	Player player;
-	Vector2 player_pos = {2.5f * 16, 2.5f * 16};
-	Vector2 player_size = {24, 24};
-
-	Vector2 player_hitbox_offset = {8, 15};
-	Vector2 player_hitbox_size = {10, 8};
-
-	char player_img_path[512];
-	snprintf(player_img_path, sizeof(player_img_path), "%splayer.png", global_assets_path);
-	Player_Init(&player, renderer, 6, 6, 0.45f, 0.075f, player_pos, player_size, player_img_path, player_hitbox_offset, player_hitbox_size);
+	Scene scene_1;
 
 	// Map stuff
 	Map map;
+
+	InitGlobalPath();
 
 	// Map tilesets
 	char tilesets_buf[2][FILE_PATH_SIZE];
@@ -56,10 +49,10 @@ int main(int argc, char *argv[]) {
 	snprintf(layouts_buf[4], sizeof(layouts_buf[4]), "%s%s", global_assets_path, "level1/level-1_items_top.csv");
 
 	int cols[5] = {
-		1,	// Collisions
-		10, // Ground bottom
-		10, // Ground top
-		12, // Items bottom
+		1,	 // Collisions
+		10,	 // Ground bottom
+		10,	 // Ground top
+		12,	 // Items bottom
 		12}; // Items top
 
 	char *layouts[5];
@@ -73,6 +66,11 @@ int main(int argc, char *argv[]) {
 	}
 
 	Map_Init(&map, renderer, 16, 5, 2, layouts, tilesets, cols);
+	Scene_Init(&scene_1, &player, &map);
+
+	Scene *scenes[1] = {&scene_1};
+	Game_Init(&game, &player, scenes, 1);
+	Game_Init_Scene(&game, 0, renderer);
 
 	// Setup timing variables
 	uint64_t last_time = SDL_GetTicksNS();
@@ -96,20 +94,8 @@ int main(int argc, char *argv[]) {
 			}
 		}
 
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-		SDL_RenderClear(renderer);
-
-		// Game logic
-		Player_Update(&player, &map, event, delta_time);
-
-		Map_Draw(map.textures[1], renderer, &map.layers[1], map.tile_size); // Ground bottom
-		Map_Draw(map.textures[1], renderer, &map.layers[2], map.tile_size); // Ground top
-		Map_Draw(map.textures[0], renderer, &map.layers[3], map.tile_size); // Items bottom
-		Player_Draw(&player, renderer, delta_time);
-
-		Map_Draw(map.textures[0], renderer, &map.layers[4], map.tile_size); // Items top
-
-		SDL_RenderPresent(renderer);
+		// Game loop
+		Game_Update_Scene(&game, 0, renderer, delta_time, event);
 
 		// Framerate stuff
 		uint64_t end_ticks = SDL_GetTicks();
@@ -120,8 +106,7 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	Map_Destroy(&map);
-	Player_Delete(&player);
+	Game_End(&game);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
