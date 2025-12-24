@@ -10,8 +10,30 @@
 #define FPS 60
 #define FRAME_TARGET_MS (1000.0f / FPS)
 
-void Map1_Init(Map *map, SDL_Renderer *renderer) {
+void Set_Player(Player *player, SDL_Renderer *renderer, Vector2 pos) {
 	InitGlobalPath();
+
+	// Player init
+	pos.x -= 1;
+	pos.y -= 1;
+
+	Vector2 player_pos = {pos.x * 16, pos.y * 16};
+	Vector2 player_size = {24, 24};
+
+	Vector2 player_hitbox_offset = {8, 15};
+	Vector2 player_hitbox_size = {10, 8};
+
+	char player_img_path[512];
+	snprintf(player_img_path, sizeof(player_img_path), "%splayer.png", global_assets_path);
+	Player_Init(player, renderer, 6, 6, 0.45f, 0.075f, player_pos, player_size, player_img_path, player_hitbox_offset, player_hitbox_size);
+}
+
+// ------------------------------------------------------ Level 1 ------------------------------------------------------
+void Level1_Init(Map *map, SDL_Renderer *renderer, Player *player, Scene *scene) {
+	InitGlobalPath();
+
+	Vector2 player_position = {3, 2};
+	Set_Player(player, renderer, player_position);
 
 	// Map tilesets
 	char tilesets_buf[2][FILE_PATH_SIZE];
@@ -44,6 +66,48 @@ void Map1_Init(Map *map, SDL_Renderer *renderer) {
 	}
 
 	Map_Init(map, renderer, 16, 5, 2, layouts, tilesets, cols);
+	Scene_Init(scene, player, map);
+}
+
+// ------------------------------------------------------ Level 2 ------------------------------------------------------
+void Level2_Init(Map *map, SDL_Renderer *renderer, Player *player, Scene *scene) {
+	InitGlobalPath();
+
+	Vector2 player_position = {2.7, 3.5};
+	Set_Player(player, renderer, player_position);
+
+	// Map tilesets
+	char tilesets_buf[2][FILE_PATH_SIZE];
+	snprintf(tilesets_buf[0], sizeof(tilesets_buf[0]), "%s%s", global_assets_path, "items.png");
+	snprintf(tilesets_buf[1], sizeof(tilesets_buf[1]), "%s%s", global_assets_path, "tilemap.png");
+
+	// Map layouts
+	char layouts_buf[5][FILE_PATH_SIZE];
+	snprintf(layouts_buf[0], sizeof(layouts_buf[0]), "%s%s", global_assets_path, "level2/level-2_collisions.csv");
+	snprintf(layouts_buf[1], sizeof(layouts_buf[1]), "%s%s", global_assets_path, "level2/level-2_ground_bottom.csv");
+	snprintf(layouts_buf[2], sizeof(layouts_buf[2]), "%s%s", global_assets_path, "level2/level-2_ground_top.csv");
+	snprintf(layouts_buf[3], sizeof(layouts_buf[3]), "%s%s", global_assets_path, "level2/level-2_items_bottom.csv");
+	snprintf(layouts_buf[4], sizeof(layouts_buf[4]), "%s%s", global_assets_path, "level2/level-2_items_top.csv");
+
+	int cols[5] = {
+		1,	 // Collisions
+		10,	 // Ground bottom
+		10,	 // Ground top
+		12,	 // Items bottom
+		12}; // Items top
+
+	char *layouts[5];
+	for (int i = 0; i < 5; i++) {
+		layouts[i] = layouts_buf[i];
+	}
+
+	char *tilesets[2];
+	for (int i = 0; i < 2; i++) {
+		tilesets[i] = tilesets_buf[i];
+	}
+
+	Map_Init(map, renderer, 16, 5, 2, layouts, tilesets, cols);
+	Scene_Init(scene, player, map);
 }
 
 // -------------------------------------------------------- Main --------------------------------------------------------
@@ -69,15 +133,18 @@ int main(int argc, char *argv[]) {
 	// ------------------------- Scene 1 -------------------------
 	Scene scene_1;
 	Map map_1;
-	Map1_Init(&map_1, renderer);
-	Scene_Init(&scene_1, &player, &map_1);
+	Level1_Init(&map_1, renderer, &player, &scene_1);
 
+	// ------------------------- Scene 2 -------------------------
+	Scene scene_2;
+	Map map_2;
+	Level2_Init(&map_2, renderer, &player, &scene_2);
 
 	// ------------------------ Game init ------------------------
-	Scene *scenes[1] = {&scene_1};
+	Scene *scenes[2] = {&scene_1, &scene_2};
+	int current_scene = 1;
 
-	Game_Init(&game, &player, scenes, 1);
-	Game_Init_Scene(&game, 0, renderer);
+	Game_Init(&game, scenes, 2);
 
 	// Setup timing variables
 	uint64_t last_time = SDL_GetTicksNS();
@@ -102,7 +169,7 @@ int main(int argc, char *argv[]) {
 		}
 
 		// Game loop
-		Game_Update_Scene(&game, 0, renderer, delta_time, event);
+		Game_Update(&game, renderer, &current_scene, delta_time, event);
 
 		// ------------------ Framerate cap ------------------
 		uint64_t end_ticks = SDL_GetTicks();

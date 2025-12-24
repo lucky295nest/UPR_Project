@@ -6,40 +6,28 @@
 #include "player.h"
 #include "scene.h"
 
-void Game_Init(Game *game, Player *player, Scene *scenes[], int scenes_num) {
+void Game_Init(Game *game, Scene *scenes[], int scenes_num) {
 	for (int i = 0; i < scenes_num; i++) {
 		game->scenes[i] = *scenes[i];
-		game->scenes[i].player = player;
 	}
 }
 
-void Game_Update(Game *game, SDL_Renderer *renderer, int scenes_num) {
+void Game_Update(Game *game, SDL_Renderer *renderer, int *current_scene, float delta_time, SDL_Event event) {
+	Game_Update_Scene(game, current_scene, renderer, delta_time, event);
 }
 
-void Game_Init_Scene(Game *game, int scene, SDL_Renderer *renderer) {
+void Game_Init_Scene(Game *game, int scene, SDL_Renderer *renderer, Player *player) {
 	// Global path init
 	InitGlobalPath();
-
-	Player *player = game->scenes[scene].player;
-
-	// Player init
-	Vector2 player_pos = {2.5f * 16, 2.5f * 16};
-	Vector2 player_size = {24, 24};
-
-	Vector2 player_hitbox_offset = {8, 15};
-	Vector2 player_hitbox_size = {10, 8};
-
-	char player_img_path[512];
-	snprintf(player_img_path, sizeof(player_img_path), "%splayer.png", global_assets_path);
-	Player_Init(player, renderer, 6, 6, 0.45f, 0.075f, player_pos, player_size, player_img_path, player_hitbox_offset, player_hitbox_size);
+	game->scenes[scene].player = player;
 }
 
-void Game_Update_Scene(Game *game, int scenes_num, SDL_Renderer *renderer, float delta_time, SDL_Event event) {
+void Game_Update_Scene(Game *game, int *current_scene, SDL_Renderer *renderer, float delta_time, SDL_Event event) {
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 	SDL_RenderClear(renderer);
 
-	Player *player = game->scenes[scenes_num].player;
-	Map *map = game->scenes[scenes_num].map;
+	Player *player = game->scenes[*current_scene].player;
+	Map *map = game->scenes[*current_scene].map;
 
 	// Game logic
 	Player_Update(player, map, event, delta_time);
