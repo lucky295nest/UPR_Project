@@ -5,6 +5,7 @@
 #include "map.h"
 #include "player.h"
 #include "scene.h"
+#include "food.h"
 
 void Game_Init(Game *game, Scene *scenes[], int scenes_num) {
 	for (int i = 0; i < scenes_num; i++) {
@@ -17,8 +18,6 @@ void Game_Update(Game *game, SDL_Renderer *renderer, int *current_scene, float d
 }
 
 void Game_Init_Scene(Game *game, int scene, SDL_Renderer *renderer, Player *player) {
-	// Global path init
-	InitGlobalPath();
 	game->scenes[scene].player = player;
 }
 
@@ -28,6 +27,7 @@ void Game_Update_Scene(Game *game, int *current_scene, SDL_Renderer *renderer, f
 
 	Player *player = game->scenes[*current_scene].player;
 	Map *map = game->scenes[*current_scene].map;
+	Food *food = game->scenes[*current_scene].food;
 
 	// Game logic
 	Player_Update(player, map, event, delta_time);
@@ -38,12 +38,12 @@ void Game_Update_Scene(Game *game, int *current_scene, SDL_Renderer *renderer, f
 	Player_Draw(player, renderer, delta_time);
 
 	Map_Draw(map->textures[0], renderer, &map->layers[4], map->tile_size); // Items top
+	Food_Draw(food, renderer);
 
 	SDL_RenderPresent(renderer);
 }
 
 void Game_End(Game *game) {
-
 	for (int i = 0; i < SCENES_NUM; i++) {
 		Scene_Destroy(&game->scenes[i]);
 	}

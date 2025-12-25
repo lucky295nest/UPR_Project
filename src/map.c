@@ -73,6 +73,7 @@ void Map_Init(Map *map, SDL_Renderer *renderer, int tile_size, int layouts_num, 
 	map->tile_size = tile_size;
 
 	for (int i = 0; i < layouts_num; i++) {
+		map->layers[i].tile_positions = NULL;
 		map->layers[i] = ParseCSV(layouts[i]);
 		map->layers[i].tileset_cols = cols[i];
 	}
@@ -110,6 +111,10 @@ void Map_Destroy(Map *map) {
 		if (map->layers[i].tiles != NULL) {
 			free(map->layers[i].tiles);
 			map->layers[i].tiles = NULL;
+		}
+		if (map->layers[i].tile_positions != NULL) {
+			free(map->layers[i].tile_positions);
+			map->layers[i].tile_positions = NULL;
 		}
 	}
 

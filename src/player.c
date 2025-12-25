@@ -6,7 +6,7 @@
 #include "player.h"
 
 // Private
-void SetTexture(SDL_Texture **texture, char *path, SDL_Renderer *renderer) {
+void Player_SetTexture(SDL_Texture **texture, char *path, SDL_Renderer *renderer) {
 	SDL_Surface *sur = IMG_Load(path);
 
 	if (!sur) {
@@ -129,7 +129,7 @@ void Player_Init(Player *player, SDL_Renderer *renderer, int lives, float speed,
 	player->frame_duration = 0;
 	player->current_frame = 0;
 
-	SetTexture(&player->texture, img_path, renderer);
+	Player_SetTexture(&player->texture, img_path, renderer);
 }
 
 void Player_Draw(Player *player, SDL_Renderer *renderer, float delta_time) {

@@ -13,6 +13,8 @@ typedef struct
 	Vector2_int size;
 	int tileset_cols;
 	int *tiles;
+	Vector2 *tile_positions;
+	int tile_count;
 } TileLayer;
 
 typedef struct
