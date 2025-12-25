@@ -8,7 +8,7 @@
 #include "map.h"
 
 // Private
-TileLayer ParseCSV(const char *path_to_csv) {
+TileLayer Map_ParseCSV(const char *path_to_csv) {
 	TileLayer layer = {0};
 
 	FILE *file = fopen(path_to_csv, "r");
@@ -35,7 +35,7 @@ TileLayer ParseCSV(const char *path_to_csv) {
 
 	rewind(file);
 
-	layer.tiles = malloc(sizeof(int) * layer.size.x * layer.size.y);
+	layer.tiles = malloc(sizeof(Tile) * layer.size.x * layer.size.y);
 
 	if (!layer.tiles) {
 		fclose(file);
@@ -47,7 +47,10 @@ TileLayer ParseCSV(const char *path_to_csv) {
 		int x = 0;
 		char *tok = strtok(line, ",");
 		while (tok && x < layer.size.x) {
-			layer.tiles[y * layer.size.x + x] = atoi(tok);
+			layer.tiles[y * layer.size.x + x].tile_num = atoi(tok);
+			Vector2 tile_position = {x, y};
+			layer.tiles[y * layer.size.x + x].tile_position = tile_position;
+			//printf("tile position => (%f, %f)\n", tile_position.x, tile_position.y);
 			tok = strtok(NULL, ",");
 			x++;
 		}
@@ -61,7 +64,7 @@ TileLayer ParseCSV(const char *path_to_csv) {
 	return layer;
 }
 
-void LoadTextures(SDL_Texture **texture, SDL_Renderer *renderer, char *path) {
+void Map_LoadTextures(SDL_Texture **texture, SDL_Renderer *renderer, char *path) {
 	SDL_Surface *sur = IMG_Load(path);
 	*texture = SDL_CreateTextureFromSurface(renderer, sur);
 	SDL_SetTextureScaleMode(*texture, SDL_SCALEMODE_NEAREST);
@@ -73,20 +76,19 @@ void Map_Init(Map *map, SDL_Renderer *renderer, int tile_size, int layouts_num, 
 	map->tile_size = tile_size;
 
 	for (int i = 0; i < layouts_num; i++) {
-		map->layers[i].tile_positions = NULL;
-		map->layers[i] = ParseCSV(layouts[i]);
+		map->layers[i] = Map_ParseCSV(layouts[i]);
 		map->layers[i].tileset_cols = cols[i];
 	}
 
 	for (int i = 0; i < tilesets_num; i++) {
-		LoadTextures(&map->textures[i], renderer, tilesets[i]);
+		Map_LoadTextures(&map->textures[i], renderer, tilesets[i]);
 	}
 }
 
 void Map_Draw(SDL_Texture *texture, SDL_Renderer *renderer, TileLayer *layer, int tile_size) {
 	for (int x = 0; x < layer->size.x; x++) {
 		for (int y = 0; y < layer->size.y; y++) {
-			int tile_id = layer->tiles[y * layer->size.x + x];
+			int tile_id = layer->tiles[y * layer->size.x + x].tile_num;
 
 			if (tile_id == -1) {
 				continue;
@@ -111,10 +113,6 @@ void Map_Destroy(Map *map) {
 		if (map->layers[i].tiles != NULL) {
 			free(map->layers[i].tiles);
 			map->layers[i].tiles = NULL;
-		}
-		if (map->layers[i].tile_positions != NULL) {
-			free(map->layers[i].tile_positions);
-			map->layers[i].tile_positions = NULL;
 		}
 	}
 

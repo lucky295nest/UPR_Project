@@ -63,7 +63,7 @@ int IsCollider(Map *map, int x, int y) {
 	int tx = x / map->tile_size;
 	int ty = y / map->tile_size;
 
-	return (layer->tiles[ty * layer->size.x + tx]);
+	return (layer->tiles[ty * layer->size.x + tx].tile_num);
 }
 
 int CanMove(Player *player, Map *map) {

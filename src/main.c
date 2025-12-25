@@ -1,13 +1,12 @@
 #include <SDL3/SDL.h>
 #include <stdio.h>
-#include <time.h>
 
-#include "food.h"
 #include "game.h"
 #include "global.h"
 #include "map.h"
 #include "player.h"
 #include "scene.h"
+#include "food.h"
 
 #define FPS 60
 #define FRAME_TARGET_MS (1000.0f / FPS)
@@ -31,7 +30,7 @@ void Set_Player(Player *player, SDL_Renderer *renderer, Vector2 pos) {
 }
 
 // ------------------------------------------------------ Level 1 ------------------------------------------------------
-void Level1_Init(Map *map, SDL_Renderer *renderer, Player *player, Scene *scene, Food *food) {
+void Level1_Init(Map *map, SDL_Renderer *renderer, Player *player, Scene *scene, Food **food) {
 	InitGlobalPath();
 
 	Vector2 player_position = {2.7, 3.5};
@@ -62,7 +61,7 @@ void Level1_Init(Map *map, SDL_Renderer *renderer, Player *player, Scene *scene,
 		1}; // Food placement
 
 	char *layouts[6];
-	for (int i = 0; i < 5; i++) {
+	for (int i = 0; i < 6; i++) {
 		layouts[i] = layouts_buf[i];
 	}
 
@@ -71,14 +70,12 @@ void Level1_Init(Map *map, SDL_Renderer *renderer, Player *player, Scene *scene,
 		tilesets[i] = tilesets_buf[i];
 	}
 
-	Map_Init(map, renderer, 16, 5, 2, layouts, tilesets, cols);
-	Food_Init(food, 16, 5, map, player, renderer, tilesets[2], tilesets[3]);
-	Scene_Init(scene, player, map, food);
+	Map_Init(map, renderer, 16, 6, 4, layouts, tilesets, cols);
+	Scene_Init(scene, player, renderer, map, food, 5, tilesets[2], tilesets[3]);
 }
 
 // -------------------------------------------------------- Main --------------------------------------------------------
 int main(int argc, char *argv[]) {
-	srand(time(NULL));
 	SDL_Window *window = NULL;
 	SDL_Renderer *renderer = NULL;
 
@@ -100,8 +97,8 @@ int main(int argc, char *argv[]) {
 	// ------------------------- Scene 2 -------------------------
 	Scene scene_1;
 	Map map_1;
-	Food food_1[MAX_FOOD];
-	Level1_Init(&map_1, renderer, &player, &scene_1, food_1);
+	Food *food_1;
+	Level1_Init(&map_1, renderer, &player, &scene_1, &food_1);
 
 	// ------------------------ Game init ------------------------
 	Scene *scenes[1] = {&scene_1};

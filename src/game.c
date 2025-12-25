@@ -25,9 +25,10 @@ void Game_Update_Scene(Game *game, int *current_scene, SDL_Renderer *renderer, f
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 	SDL_RenderClear(renderer);
 
-	Player *player = game->scenes[*current_scene].player;
-	Map *map = game->scenes[*current_scene].map;
-	Food *food = game->scenes[*current_scene].food;
+	Scene scene = game->scenes[*current_scene];
+	Player *player = scene.player;
+	Map *map = scene.map;
+	Food *food = scene.food;
 
 	// Game logic
 	Player_Update(player, map, event, delta_time);
@@ -35,11 +36,13 @@ void Game_Update_Scene(Game *game, int *current_scene, SDL_Renderer *renderer, f
 	Map_Draw(map->textures[1], renderer, &map->layers[1], map->tile_size); // Ground bottom
 	Map_Draw(map->textures[1], renderer, &map->layers[2], map->tile_size); // Ground top
 	Map_Draw(map->textures[0], renderer, &map->layers[3], map->tile_size); // Items bottom
+	for (int i = 0; i < scene.food_count; i++)
+	{
+		Food_Draw(&food[i], renderer, map);
+	}
 	Player_Draw(player, renderer, delta_time);
-
 	Map_Draw(map->textures[0], renderer, &map->layers[4], map->tile_size); // Items top
-	Food_Draw(food, renderer);
-
+	
 	SDL_RenderPresent(renderer);
 }
 

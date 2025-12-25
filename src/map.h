@@ -10,10 +10,16 @@
 
 typedef struct
 {
+	int tile_num;
+	Vector2 tile_position;
+} Tile;
+
+
+typedef struct
+{
 	Vector2_int size;
 	int tileset_cols;
-	int *tiles;
-	Vector2 *tile_positions;
+	Tile *tiles;
 	int tile_count;
 } TileLayer;
 
