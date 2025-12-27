@@ -14,9 +14,12 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address")
 # ------------------------------
 # SDL3 static configuration
 # ------------------------------
-set(SDL_SHARED OFF CACHE BOOL "" FORCE)
-set(SDL_STATIC ON CACHE BOOL "" FORCE)
-set(SDL_TEST OFF CACHE BOOL "" FORCE)
+set(SDL3_SHARED ON CACHE BOOL "" FORCE)
+set(SDL3_STATIC OFF CACHE BOOL "" FORCE)
+
+set(SDL3IMAGE_SHARED ON CACHE BOOL "" FORCE)
+set(SDL3IMAGE_STATIC OFF CACHE BOOL "" FORCE)
+
 
 # SDL3_image static configuration
 set(SDL3_IMAGE_VENDORED ON CACHE BOOL "" FORCE)
