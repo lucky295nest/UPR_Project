@@ -39,6 +39,7 @@ void Game_Update_Scene(Game *game, int *current_scene, SDL_Renderer *renderer, f
 	for (int i = 0; i < scene.food_count; i++)
 	{
 		Food_Draw(&food[i], renderer, map);
+		Food_Eat(&food[i], player);
 	}
 	Player_Draw(player, renderer, delta_time);
 	Map_Draw(map->textures[0], renderer, &map->layers[4], map->tile_size); // Items top
